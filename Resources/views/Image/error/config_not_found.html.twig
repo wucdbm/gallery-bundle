@@ -1,0 +1,14 @@
+{% extends '@WucdbmGallery/Image/base.html.twig' %}
+
+{% block content %}
+    <div class="alert alert-warning">
+        Config at key {{ config }} was not found.
+    </div>
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li>
+        Error
+    </li>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends '@WucdbmGallery/Image/base.html.twig' %}
+
+{% block content %}
+    {% form_theme form '@WucdbmGallery/_shared/form/form_theme.html.twig' %}
+    {{ form_start(form) }}
+    {{ form_rest(form) }}
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">
+            Upload
+        </button>
+    </div>
+    {{ form_end(form) }}
+    {{ form(form) }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li>
+        <i class="fa fa-upload"></i>
+        Upload
+    </li>
+{% endblock %}

@@ -1,0 +1,18 @@
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="app.repo.abstract" abstract="true">
+            <factory service="doctrine.orm.default_entity_manager" method="getRepository"/>
+        </service>
+        <service id="wucdbm_gallery.repo.images" class="Wucdbm\Bundle\GalleryBundle\Repository\ImageRepository" parent="app.repo.abstract">
+            <argument>Wucdbm\Bundle\GalleryBundle\Entity\Image</argument>
+        </service>
+        <service id="wucdbm_gallery.repo.configs" class="Wucdbm\Bundle\GalleryBundle\Repository\ConfigRepository" parent="app.repo.abstract">
+            <argument>Wucdbm\Bundle\GalleryBundle\Entity\Config</argument>
+        </service>
+
+    </services>
+</container>

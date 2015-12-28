@@ -1,0 +1,283 @@
+{% block crop_page %}
+
+    <div class="row">
+        <div class="col-md-9">
+            <img src="{{ path('wucdbm_gallery_image_serve_temp', {name: name}) }}" id="image" class="img-responsive"/>
+        </div>
+        <div class="col-md-3">
+            {% if error %}
+                <div class="alert alert-danger">
+                    <p>{{ error }}</p>
+                </div>
+            {% endif %}
+            {% form_theme form '@WucdbmGallery/_shared/form/form_theme.html.twig' %}
+            {{ form_start(form) }}
+            <div class="form-group">
+                <div class="btn-group">
+                    <button type="submit" id="cropAndEdit" name="cropAndEdit" class="btn btn-default" rel="tooltip" title="Crop and continue editing the image">
+                        Crop
+                    </button>
+                    <button type="submit" id="cropAndPreview" name="cropAndPreview" class="btn btn-default" rel="tooltip" title="Crop and preview the new image">
+                        Preview
+                    </button>
+                    {{ form_widget(form.cropAndSave) }}
+                    {% if false %}
+                        <a href="javascript:;" class="btn btn-primary">
+                            <i class="fa fa-edit"></i> Crop & Edit {# save in temp dir and crop #}
+                        </a>
+                        <a href="javascript:;" class="btn purple">
+                            <i class="fa fa-search"></i> Прегледай {# modal #}
+                        </a>
+                        <a href="{{ path('wucdbm_gallery_image_save', {id: product.id, name: name}) }}" class="btn green">
+                            <i class="fa fa-save"></i>
+                            Запази
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {{ form_row(form.config) }}
+
+            <hr>
+
+            <h5>Quick selection</h5>
+            <div class="btn-group">
+                <a href="javascript:;" class="btn btn-default fit-width-height">
+                    Max
+                </a>
+                <a href="javascript:;" class="btn btn-default full-width">
+                    100% Width
+                </a>
+                <a href="javascript:;" class="btn btn-default full-height">
+                    100% Height
+                </a>
+            </div>
+
+            <hr>
+
+            <h5>Aspect Ratios</h5>
+            <div class="btn-group">
+                <!-- TODO: This -->
+                <a href="javascript:;" class="btn btn-default {% if false and product.type.imageRatio is null %} btn-primary{% endif %} aspect-ratio-button" data-aspect-ratio="0">
+                    Release
+                </a>
+                {% for name, ratio in ratios %}
+                    <!-- TODO: This -->
+                    <a href="javascript:;" class="btn btn-default {% if false and product.type.imageRatio and product.type.imageRatio.id == ratio.id %} btn-primary{% endif %} aspect-ratio-button"
+                       rel="tooltip" title="{{ ratio.width }}:{{ ratio.height }}"
+                       data-aspect-ratio="{{ ratio.width / ratio.height }}">
+                        {{ name }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            <hr>
+
+            {% if sizes|length %}
+                <h5>Sizes</h5>
+                <div class="btn-group">
+                    {% for name, size in sizes %}
+                        <a href="javascript:;" class="btn btn-default max-size-button"
+                           data-max-width="{{ size.width }}" data-max-height="{{ size.height }}"
+                           data-aspect-ratio-button="{{ size.width }}x{{ size.height }}"
+                           rel="tooltip" title="{{ size.width }}x{{ size.height }}">
+                            {{ name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <hr>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+    <div class="modal fade" id="previewModal" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog" style="width: 962px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <a href="javascript:;" class="close" data-dismiss="modal" aria-hidden="true">x</a>
+                    <h4 class="modal-title">Снимка</h4>
+                </div>
+                <div class="modal-body" style="padding:0; margin:0;">
+                    <img src="" class="preview-img img-responsive" style="margin: 25px auto;"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block crop_scripts %}
+
+    var jcrop_api;
+
+    $.blockUI({
+    message: 'Please wait until image loads.'
+    });
+
+    $(window).load(function() {
+    $('#image').Jcrop({
+    onChange:   onChange,
+    onSelect:   onSelect,
+    onRelease:  onRelease,
+    trueSize: getTrueSize(),
+    minSize: [ 120, 120 ],
+    //maxSize: [ 1920, 1080 ],
+    aspectRatio: $('.aspect-ratio-button').first().data('aspect-ratio'),
+    //setSelect:   [ 100, 100, 50, 50 ],
+    bgFade: true
+    //allowSelect: false
+    }, function() {
+    jcrop_api = this;
+    $.unblockUI();
+    var naturalSize = getTrueSize();
+    jcrop_api.setSelect([0,0,naturalSize[0],naturalSize[1]]);
+    });
+    });
+
+    $('.aspect-ratio-button').click(function(e) {
+    var button = $(this);
+    var ratio = button.data('aspect-ratio');
+    jcrop_api.setOptions({
+    aspectRatio: ratio
+    });
+    $('.aspect-ratio-button').removeClass('btn-primary');
+    button.addClass('btn-primary');
+    });
+
+    $('.full-width').click(function(e) {
+    var x1 = 0,
+    x2 = document.getElementById('image').naturalWidth,
+    y1 = $('#{{ form.y1.vars.id }}').val(),
+    y2 = $('#{{ form.y2.vars.id }}').val();
+    jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.full-height').click(function(e) {
+    var x1 = $('#{{ form.x1.vars.id }}').val(),
+    x2 = $('#{{ form.x2.vars.id }}').val(),
+    y1 = 0,
+    y2 = document.getElementById('image').naturalHeight;
+    jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.fit-width-height').click(function(e) {
+    var x1 = 0,
+    x2 = document.getElementById('image').naturalWidth,
+    y1 = 0,
+    y2 = document.getElementById('image').naturalHeight;
+    jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.max-size-button').click(function(e) {
+    var set = $(this).hasClass('btn-primary');
+    $('.max-size-button').removeClass('btn-primary');
+    if (set) {
+    jcrop_api.setOptions({
+    maxSize: [ 0, 0 ]
+    });
+    $(this).removeClass('btn-primary');
+    } else {
+    if ($(this).data('aspect-ratio-button')) {
+    $('#'+$(this).data('aspect-ratio-button')).trigger('click');
+    }
+    jcrop_api.setOptions({
+    maxSize: [ $(this).data('max-width'), $(this).data('max-height') ]
+    });
+    $(this).addClass('btn-primary');
+    }
+    jcrop_api.focus();
+    });
+
+    {#$('#{{ form.cropAndEdit.vars.id }}').click(function(e) {#}
+    {#e.preventDefault();#}
+    {#$(this).parents('form').submit();#}
+    {#});#}
+
+    $('#cropAndPreview').click(function(e) {
+    e.preventDefault();
+    var form = $(this).parents('form');
+    $.blockUI({
+    message: 'Please wait while your image is being processed. <br> This might take up to a few seconds depending on its size.'
+    });
+    $.ajax({
+    url: '{{ path('wucdbm_gallery_image_crop_and_preview', {config: config, name: name}) }}',
+    type: 'POST',
+    data: form.serialize(),
+    dataType: 'json'
+    }).done(function(data) {
+    if (data.success) {
+    // TODO: Change modal with MangificPopup
+    var modal = $('#previewModal');
+    modal.find('img.preview-img').attr('src', data.url);
+    modal.modal();
+    } else {
+    bootbox.alert(data.error);
+    }
+    $.unblockUI();
+    });
+    });
+
+    {#$('#{{ form.cropAndEdit.vars.id }}').click(function(e) {#}
+    {#//e.preventDefault();#}
+    {#//$(this).parents('form').submit();#}
+    {#});#}
+
+    $('#{{ form.vars.id }}').on('change','input.jcrop-coord',function(e){
+    var x1 = $('#{{ form.x1.vars.id }}').val(),
+    x2 = $('#{{ form.x2.vars.id }}').val(),
+    y1 = $('#{{ form.y1.vars.id }}').val(),
+    y2 = $('#{{ form.y2.vars.id }}').val();
+    jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    function onChange(c) {
+    showCoords(c);
+    //updatePreview(c);
+    };
+
+    function onSelect(c) {
+    showCoords(c);
+    //updatePreview(c);
+    };
+
+    function onRelease(c) {
+    clearCoords();
+    };
+
+    // Simple event handler, called from onChange and onSelect
+    // event handlers, as per the Jcrop invocation above
+    function showCoords(c) {
+    $('#{{ form.x1.vars.id }}').val(parseInt(c.x));
+    $('#{{ form.y1.vars.id }}').val(parseInt(c.y));
+    $('#{{ form.x2.vars.id }}').val(parseInt(c.x2));
+    $('#{{ form.y2.vars.id }}').val(parseInt(c.y2));
+    $('#{{ form.width.vars.id }}').val(parseInt(c.w));
+    $('#{{ form.height.vars.id }}').val(parseInt(c.h));
+    };
+
+    function clearCoords() {
+    $('#coords input').val('');
+    };
+
+    function getTrueSize() {
+    var nWidth = document.getElementById('image').naturalWidth,
+    nHeight = document.getElementById('image').naturalHeight;
+    return [nWidth, nHeight];
+    };
+
+    function updatePreview(c) {
+    if (parseInt(c.w) > 0) {
+    var rx = xsize / c.w;
+    var ry = ysize / c.h;
+
+    $pimg.css({
+    width: Math.round(rx * boundx) + 'px',
+    height: Math.round(ry * boundy) + 'px',
+    marginLeft: '-' + Math.round(rx * c.x) + 'px',
+    marginTop: '-' + Math.round(ry * c.y) + 'px'
+    });
+    }
+    };
+
+{% endblock %}

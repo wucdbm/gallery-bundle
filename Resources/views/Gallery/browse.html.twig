@@ -1,0 +1,39 @@
+{% extends '@WucdbmGallery/Gallery/base.html.twig' %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            {% form_theme filterForm '@WucdbmGallery/_shared/form/filter_theme.html.twig' %}
+            {{ form(filterForm) }}
+
+            <hr>
+
+            {% if images|length %}
+                {% for row in images|chunk(6) %}
+                    <div class="row">
+                        {% for image in row %}
+                            <div class="col-xs-2">
+                                <img src="{{ image|wucdbmGalleryImage }}" class="img-responsive" />
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>no images found</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        {% include '@WucdbmGallery/_shared/pagination.html.twig' %}
+    </div>
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li>
+        Gallery
+    </li>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+wucdbm_gallery_image_upload:
+      path:      /upload/{config}
+      defaults:  { _controller: WucdbmGalleryBundle:Image:upload, config: null }
+
+wucdbm_gallery_image_crop:
+      path:      /crop/{name}/{config}
+      defaults:  { _controller: WucdbmGalleryBundle:Image:crop, config: null }
+
+wucdbm_gallery_image_crop_and_preview:
+      path:      /crop-and-preview/{name}/{config}
+      defaults:  { _controller: WucdbmGalleryBundle:Image:cropAndPreview, config: null }
+
+wucdbm_gallery_image_serve_temp:
+      path:      /temp/{name}
+      defaults:  { _controller: WucdbmGalleryBundle:Image:serveTemp }
+
+wucdbm_gallery_image_save:
+      path:      /save/{config}/{name}
+      defaults:  { _controller: WucdbmGalleryBundle:Image:save }
+
+# TODO: Those down here - List, edit, delete, refresh list
+
+#wucdbm_gallery_image_refresh:
+#      path:      /refresh/{id}
+#      defaults:  { _controller: WucdbmGalleryBundle:Image:refreshImage }
+#
+#wucdbm_gallery_image_delete:
+#      path:      /delete/{id}
+#      defaults:  { _controller: WucdbmGalleryBundle:Image:deleteImage }
+#
+## List / Edit
+#
+#wucdbm_gallery_image_list:
+#      path:      /list
+#      defaults:  { _controller: WucdbmGalleryBundle:Image:listImages }
+#
+wucdbm_gallery_image_edit:
+      path:      /{id}/edit
+      defaults:  { _controller: WucdbmGalleryBundle:Image:edit }

@@ -1,0 +1,7 @@
+wucdbm_gallery_gallery_gallery:
+      path:      /gallery
+      defaults:  { _controller: WucdbmGalleryBundle:Gallery:gallery }
+
+#wucdbm_hashtag_gallery_gallery_picture_json:
+#      path:      /picture/json/{id}
+#      defaults:  { _controller: Gallery:Gallery:pictureJson }

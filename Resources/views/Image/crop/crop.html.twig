@@ -1,0 +1,18 @@
+{% extends '@WucdbmGallery/Image/base.html.twig' %}
+
+{% use '@WucdbmGallery/Image/crop/crop_trait.html.twig' %}
+
+{% block content %}
+    {{ block('crop_page') }}
+{% endblock %}
+
+{% block scripts %}
+    {{ block('crop_scripts') }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li>
+        Crop
+    </li>
+{% endblock %}

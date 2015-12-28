@@ -1,0 +1,11 @@
+wucdbm_gallery_image:
+    resource: routing/image.yml
+    prefix: /images
+
+wucdbm_gallery_gallery:
+    resource: routing/gallery.yml
+    prefix: /gallery
+
+wucdbm_gallery_dashboard:
+      path:      /dashboard
+      defaults:  { _controller: WucdbmGalleryBundle:Dashboard:dashboard }

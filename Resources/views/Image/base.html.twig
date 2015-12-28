@@ -1,0 +1,22 @@
+{% extends '@WucdbmGallery/layout.html.twig' %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    <li>
+        <a href="{{ path('wucdbm_gallery_gallery_gallery') }}">
+            <i class="fa fa-picture-o"></i>
+            Images
+        </a>
+    </li>
+    {% if config %}
+        <li>
+            {{ config }}
+        </li>
+    {% endif %}
+    <li class="pull-right">
+        <a href="{{ path('wucdbm_gallery_image_upload', {config: config}) }}">
+            <i class="fa fa-upload"></i>
+            Upload
+        </a>
+    </li>
+{% endblock %}

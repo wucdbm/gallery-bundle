@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html lang="bg" class="ie8"> <![endif]-->
+<!--[if IE 9]>
+<html lang="bg" class="ie9"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="bg"> <!--<![endif]-->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Spestestveno.bg галерия продукти</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link rel="shortcut icon" href="/bundles/admin/img/favicon.ico" type="image/x-icon">
+    {% include '@WucdbmGallery/_layout/assets/styles.html.twig' %}
+</head>
+<body class="" cz-shortcut-listen="true">
+<div class="page-container">
+    <div class="page-content-wrapper">
+        <div class="page-content no-padding-t no-margin-l">
+            <nav class="navbar navbar-gallery no-margin-b" role="navigation">
+
+                <div class="navbar-header">
+                    {% if false %}
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                        Категории
+                        <i class="fa fa-reorder"></i>
+                    </button>
+                    <a class="navbar-brand logo" href="асд">Галерия</a>
+                    {% endif %}
+                </div>
+
+                <div class="collapse navbar-collapse navbar-ex1-collapse">
+
+                    {% if false %}
+                    <ul class="nav navbar-nav pull-right">
+                        <li class="pull-right">
+                            <a href="дса">
+                                <i class="fa fa-plus-square"></i> Качи снимка
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </div>
+                <!-- /.navbar-collapse -->
+
+            </nav>
+            <div class="clearfix"></div>
+            {{ block('content') }}
+        </div>
+    </div>
+</div>
+{% include '@WucdbmGallery/_layout/assets/scripts.html.twig' %}
+<script type="text/javascript">
+    $(function () {
+        Metronic.init();
+        Layout.init();
+        {{ block('scripts') }}
+    });
+</script>
+</body>
+</html>
