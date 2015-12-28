@@ -1,8 +1,8 @@
 {
-    "name": "wucdbm/menu-builder-bundle",
+    "name": "wucdbm/gallery-bundle",
     "type": "symfony-bundle",
-    "description": "A simple, standalone Menu Builder for Symfony 2 Applications",
-    "keywords": ["wucdbm", "menu", "builder", "menu builder", "symfony2"],
+    "description": "A gallery bundle for Symfony 2 Applications that allows you to upload files to several places and keep track of them in your database.",
+    "keywords": ["wucdbm", "gallery", "gallery bundle", "symfony2"],
     "authors": [
         {
             "name": "Martin Kirilov",
@@ -16,7 +16,7 @@
         "symfony/symfony": "~2.8|~3.0"
     },
     "autoload": {
-        "psr-4": { "Wucdbm\\Bundle\\MenuBuilderBundle\\": "" }
+        "psr-4": { "Wucdbm\\Bundle\\GalleryBundle\\": "" }
     },
     "license": "GPL-2.0"
 }
