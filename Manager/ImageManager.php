@@ -199,7 +199,7 @@ class ImageManager extends AbstractManager {
     }
 
     public function getImagePath(Image $image) {
-        $path = $this->getImagePath($image);
+        $path = $this->getImageDirectory($image);
         $name = $this->getImageName($image);
 
         return $path . DIRECTORY_SEPARATOR . $name;

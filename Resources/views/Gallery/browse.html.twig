@@ -14,7 +14,9 @@
                     <div class="row">
                         {% for image in row %}
                             <div class="col-xs-2">
-                                <img src="{{ image|wucdbmGalleryImage }}" class="img-responsive" />
+                                <img src="{{ image|wucdbmGalleryImage }}" class="img-responsive"
+                                     style="cursor: pointer;"
+                                     data-image="{{ path('wucdbm_gallery_gallery_image_json', {id: image.id}) }}" />
                             </div>
                         {% endfor %}
                     </div>

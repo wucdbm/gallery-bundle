@@ -2,13 +2,12 @@
 
 namespace Wucdbm\Bundle\GalleryBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Wucdbm\Bundle\GalleryBundle\Filter\Image\ImageFilter;
 use Wucdbm\Bundle\GalleryBundle\Form\Image\FilterType;
+use Wucdbm\Bundle\WucdbmBundle\Controller\BaseController;
 
-class GalleryController extends Controller {
+class GalleryController extends BaseController {
 
     public function galleryAction(Request $request) {
         $filter = new ImageFilter();
@@ -28,31 +27,23 @@ class GalleryController extends Controller {
         return $this->render('@WucdbmGallery/Gallery/browse.html.twig', $data);
     }
 
-    // TODO: Fix this crap w JMS Serializer
-    public function pictureJsonAction($id, Request $request) {
-        $filter = new ImageFilter();
-        $filter->id = $id;
-        $filter->join_sources = 1;
-//        $filter->setOption(ImageFilter::OPTION_HYDRATION, ImageFilter::OPTION_HYDRATION_ARRAY);
-        $repo = $this->get('app.repo.images');
-        $image = $repo->filterOne($filter);
-        $thumbWidth = $request->query->get('thumbWidth');
-        $thumbId = $request->query->get('thumbId');
-        $data = array(
+    public function imageJsonAction($id) {
+        $manager = $this->container->get('wucdbm_gallery.manager.images');
+        $image = $manager->getImage($id);
+
+        $data = [
             'id'            => $image->getId(),
             'md5'           => $image->getMd5(),
-            'date_uploaded' => $image->getDateUploaded(),
+            'date_uploaded' => $image->getDateUploaded()->format('Y-m-d H:i:s'),
             'extension'     => image_type_to_extension($image->getExtension()),
             'width'         => $image->getWidth(),
             'height'        => $image->getHeight(),
             'name'          => $image->getName(),
-            'description'   => $image->getDescription(),
-            'sources'       => $image->getSourcesCsv(),
-            'path'          => $this->get('hashtag.twig.extension.img')->img($image, $thumbWidth, $thumbId)
-        );
+            'path'          => $manager->getImagePath($image),
+            'url'           => $manager->getImageUrl($image)
+        ];
 
-//        return new Response('');
-        return new JsonResponse($data);
+        return $this->json($data);
     }
 
 }

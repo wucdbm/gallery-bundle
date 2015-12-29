@@ -62,12 +62,13 @@
 <script type="text/javascript">
     $(function () {
         (function () {
-            var parent;
+            var parent, parentDocument;
             if (window.opener) {
                 parent = window.opener;
             } else {
                 parent = window.parent;
             }
+            parentDocument = parent.document;
             $(document).on('click', '[data-image]', function () {
                 var url = $(this).data('image');
                 $.ajax({
@@ -75,16 +76,14 @@
                     type: 'POST',
                     dataType: 'JSON'
                 }).done(function (data) {
-                    parent.trigger('wucdbm.gallery.image', data);
-                    parent.close();
+                    if (!parent.$) {
+                        throw new Error('Parent document does not have jQuery installed. Please install jQuery and subscribe your document to "wucdbm.gallery.image".');
+                    }
+                    parent.$(parentDocument).trigger('wucdbm.gallery.image', [data, window]);
                 });
             });
         })();
-        $('.x-editable-text').editable({
-            success: function (data, newValue) {
-                $('#editBookingContainer').trigger('refresh');
-            }
-        });
+        $('.x-editable-text').editable();
         if (window.frameElement) {
             var height = $(document).height();
             if (750 > height) {

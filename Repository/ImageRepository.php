@@ -19,6 +19,11 @@ class ImageRepository extends AbstractRepository {
         return $this->returnFilteredEntities($builder, $filter, 'i.id');
     }
 
+    /**
+     * @param $id
+     * @return Image|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function findOneById($id) {
         $builder = $this->createQueryBuilder('i')
             ->addSelect('c')
@@ -30,6 +35,10 @@ class ImageRepository extends AbstractRepository {
         return $query->getOneOrNullResult();
     }
 
+    /**
+     * @param $configId
+     * @return Image[]
+     */
     public function findByConfigId($configId) {
         $builder = $this->createQueryBuilder('i')
             ->addSelect('c')
@@ -41,6 +50,12 @@ class ImageRepository extends AbstractRepository {
         return $query->getResult();
     }
 
+    /**
+     * @param $md5
+     * @param $configId
+     * @return Image|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     public function findOneByMd5AndConfigId($md5, $configId) {
         $builder = $this->createQueryBuilder('i')
             ->addSelect('c')
