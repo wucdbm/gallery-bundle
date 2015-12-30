@@ -2,6 +2,7 @@
 
 namespace Wucdbm\Bundle\GalleryBundle\Manager;
 
+use Doctrine\ORM\PersistentCollection;
 use Intervention\Image\ImageManagerStatic;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,6 +22,9 @@ use Wucdbm\Bundle\WucdbmBundle\Manager\AbstractManager;
  *      options:
  *          some: option // use options resolver here
  * TODO: Default aspect ratio
+ * strategies:
+ *      delenie ostatyk
+ *      dati
  * Class ImageManager
  * @package Wucdbm\Bundle\GalleryBundle\Manager
  */
@@ -123,10 +127,32 @@ class ImageManager extends AbstractManager {
         return $this->container->get('wucdbm_gallery.repo.images')->findOneById($id);
     }
 
+    public function getMd5FromPath($name) {
+        $matches = array();
+        preg_match('/([0-9a-f]{32})\..*/', $name, $matches);
+
+        return isset($matches[1]) ? $matches[1] : null;
+    }
+
+    /**
+     * @param $md5
+     * @param $configId
+     * @return null|Image
+     */
     public function getImageByMd5AndConfigId($md5, $configId) {
         $repo = $this->container->get('wucdbm_gallery.repo.images');
 
         return $repo->findOneByMd5AndConfigId($md5, $configId);
+    }
+
+    /**
+     * @param $md5
+     * @return Image[]
+     */
+    public function getImagesByMd5($md5) {
+        $repo = $this->container->get('wucdbm_gallery.repo.images');
+
+        return $repo->findByMd5($md5);
     }
 
     public function createEntityFromPath($path) {

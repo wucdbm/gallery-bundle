@@ -69,6 +69,22 @@ class ImageRepository extends AbstractRepository {
         return $query->getOneOrNullResult();
     }
 
+    /**
+     * @param $md5
+     * @return Image[]
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findByMd5($md5) {
+        $builder = $this->createQueryBuilder('i')
+            ->addSelect('c')
+            ->leftJoin('i.config', 'c')
+            ->andWhere('i.md5 = :md5')
+            ->setParameter('md5', $md5);
+        $query = $builder->getQuery();
+
+        return $query->getResult();
+    }
+
     public function save(Image $image) {
         $this->_em->persist($image);
         $this->_em->flush($image);
