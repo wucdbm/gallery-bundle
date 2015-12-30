@@ -18,22 +18,10 @@ wucdbm_gallery_image_save:
       path:      /save/{config}/{name}
       defaults:  { _controller: WucdbmGalleryBundle:Image:save }
 
-# TODO: Those down here - List, edit, delete, refresh list
+wucdbm_gallery_image_delete:
+      path:      /{id}/delete
+      defaults:  { _controller: WucdbmGalleryBundle:Image:delete }
 
-#wucdbm_gallery_image_refresh:
-#      path:      /refresh/{id}
-#      defaults:  { _controller: WucdbmGalleryBundle:Image:refreshImage }
-#
-#wucdbm_gallery_image_delete:
-#      path:      /delete/{id}
-#      defaults:  { _controller: WucdbmGalleryBundle:Image:deleteImage }
-#
-## List / Edit
-#
-#wucdbm_gallery_image_list:
-#      path:      /list
-#      defaults:  { _controller: WucdbmGalleryBundle:Image:listImages }
-#
 wucdbm_gallery_image_edit:
       path:      /{id}/edit
       defaults:  { _controller: WucdbmGalleryBundle:Image:edit }

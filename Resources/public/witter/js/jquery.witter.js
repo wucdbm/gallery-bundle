@@ -1,33 +1,28 @@
 /*
  * Witter for jQuery
  *
- * TODO: Add a "restore" option with a default value of TRUE, which sets whether the notification can be restored via hover or tap on smartphones. Useful if you want the notification to fade anyway - implementation must involve not registering hover handlers AT ALL
- *
  * Copyright (c) 2014 Martin Kirilov
  * Dual licensed under the MIT and GPL licenses.
  *
- * Based on Gritter for jQuery - http://www.boedesign.com/
+ * A Gritter for jQuery ripoff - http://www.boedesign.com/
  *
  * Copyright (c) 2012 Jordan Boesch
  * Dual licensed under the MIT and GPL licenses.
- *
- * Date: December 06, 2014
- * Version: 1.0.1
  */
 ;(function ($) {
 
-    /**
-     * Set it up as an object under the jQuery namespace
-     */
-    $.witter = {};
+    $.witter = function (options) {
+        try {
+            return new Witter(options || {});
+        } catch (e) {
+            var err = 'Witter Error: ' + e;
+            (typeof(console) != 'undefined' && console.error) ? console.error(err, options) : alert(err);
+        }
+    };
 
-    /**
-     * Set up global options that the user can over-ride
-     */
     $.witter.defaults = {
         title: '',
         position: 'top-right',
-        class: '',
         theme: 'dark',
         fade: {
             in: {
@@ -39,10 +34,11 @@
                 easing: ''
             }
         },
-        close_selector: '.witter-close, .close',
+        close_selector: '.witter-close',
         time: 6000,
         image: '',
         sticky: false,
+        restore: true,
         callbacks: {
             before_open: function () {
                 //
@@ -55,7 +51,7 @@
              * @param options - An object of options passed to the fade method
              * @param is_forced - Indicates whether it was closed by clicking on the close button
              */
-            fade: function (options, is_forced) {
+            fade: function (is_forced, options) {
                 //
             },
             before_close: function () {
@@ -63,29 +59,35 @@
             },
             after_close: function () {
                 //
+            },
+            html: function () {
+                //
             }
         },
         templates: {
-            close: '<a class="witter-close" href="#" tabindex="1"><i class="fa fa-times"></i></a>',
-            title: '<span class="witter-title">{title}</span>',
-            item: '<div id="witter-item-{number}" class="witter-item-wrapper {theme}" style="display:none" role="alert"><div class="witter-top"></div><div class="witter-item">{close}{image}<div class="{class}">{title}<p>{text}</p></div><div style="clear:both"></div></div><div class="witter-bottom"></div></div>',
-            html: '<div id="witter-item-{number}" class="witter-item-wrapper {theme} html" style="display:none" role="alert"><div class="witter-item">{html}<div style="clear:both"></div></div></div>',
+            close: '<a class="witter-close" href="javascript:;" tabindex="1"><i class="fa fa-times"></i></a>',
+            simple: '<div class="witter-item-simple">{close}<div class="image">{image}</div><div class="witter-title">{title}</div><p class="witter-text">{text}</p></div>',
+            item: '<div id="witter-item-{id}" class="witter-item-wrapper {theme} html" style="display:none" role="alert"><div class="witter-item">{html}<div style="clear:both"></div></div></div>',
             wrapper: '<div id="witter-wrappers"></div>'
         }
     };
 
-    $.witter.stats = {
-        instances: 0
+    $.witter.parse = function (template, data) {
+        return template.replace(/\{([\w\.]*)\}/g, function (str, key) {
+            var keys = key.split("."), v = data[keys.shift()];
+            for (var i = 0, l = keys.length; i < l; i++) v = v[keys[i]];
+            return (typeof v !== "undefined" && v !== null) ? v : "";
+        });
     };
 
-    $.witter.instances = {
+    $.witter.registry = {
         count: 0,
         instances: {},
         active: [],
         /**
          * Increments instances count, then uses it as the instance ID and returns it
          * @param instance
-         * @returns {number}
+         * @returns number
          */
         add: function (instance) {
             var id = ++this.count;
@@ -94,10 +96,10 @@
             return id;
         },
         get: function (instance) {
-            if (typeof(instance) == 'number') {
-                return this.instances[instance];
+            if (instance instanceof Witter) {
+                return instance;
             }
-            return instance;
+            return this.instances[instance];
         },
         setActive: function (id) {
             this.active.push(id);
@@ -112,50 +114,27 @@
         }
     };
 
-    $.witter.parse = function (template, data) {
-        return template.replace(/\{([\w\.]*)\}/g, function (str, key) {
-            var keys = key.split("."), v = data[keys.shift()];
-            for (var i = 0, l = keys.length; i < l; i++) v = v[keys[i]];
-            return (typeof v !== "undefined" && v !== null) ? v : "";
-        });
-    };
-
-    /**
-     * Add a witter notification to the screen
-     */
-    $.witter.add = function (params) {
-        try {
-            return new Witter(params || {});
-        } catch (e) {
-            var err = 'Witter Error: ' + e;
-            (typeof(console) != 'undefined' && console.error) ? console.error(err, params) : alert(err);
-        }
-    };
-
     /**
      * Remove a witter notification from the screen
      */
     $.witter.remove = function (instance, options) {
-        instance = $.witter.instances.get(instance);
-        instance.fade(options || {});
+        $.witter.registry.get(instance).remove(options);
     };
 
     /**
      * Remove a witter notification from the screen instantly
      */
     $.witter.removeNow = function (instance) {
-        instance = $.witter.instances.get(instance);
-        instance.removeElement();
+        $.witter.registry.get(instance).removeElement();
     };
 
     /**
      * Remove all notifications
      */
     $.witter.removeAll = function (options) {
-        var ids = $.witter.instances.getActiveIds();
+        var ids = $.witter.registry.getActiveIds();
         $.each(ids, function (index, instanceId) {
-            var instance = $.witter.instances.get(instanceId);
-            instance.fade(options || {});
+            $.witter.registry.get(instanceId).fade(true, options);
         });
     };
 
@@ -163,23 +142,28 @@
      * Remove all notifications instantly
      */
     $.witter.removeAllNow = function () {
-        var ids = $.witter.instances.getActiveIds();
+        var ids = $.witter.registry.getActiveIds();
         $.each(ids, function (index, instanceId) {
-            var instance = $.witter.instances.get(instanceId);
-            instance.removeElement();
+            $.witter.registry.get(instanceId).removeElement();
         });
     };
 
-    var wrappers = $('#witter-wrappers');
-    if (wrappers.length == 0) {
-        $('body').append($.witter.defaults.templates.wrapper);
-        wrappers = $(wrappers.selector);
-        $(['top-right', 'bottom-right', 'bottom-left', 'top-left', 'top', 'bottom']).each(function (index, className) {
-            var div = $('<div/>').addClass('wrapper').addClass(className).appendTo(wrappers);
-        });
-    }
+    $(function () {
+        $.witter.wrappers = $('#witter-wrappers');
+        if ($.witter.wrappers.length == 0) {
+            $('body').append($.witter.defaults.templates.wrapper);
+            $.witter.wrappers = $($.witter.wrappers.selector);
+            $(['top-right', 'bottom-right', 'bottom-left', 'top-left', 'top', 'bottom']).each(function (index, className) {
+                var div = $('<div/>').addClass('wrapper').addClass(className).appendTo($.witter.wrappers);
+            });
+        }
+    });
 
     var Witter = function (options) {
+        if (!(this instanceof arguments.callee)) {
+            return new arguments.callee(options);
+        }
+
         if (typeof(options) == 'string') {
             options = {text: options};
         }
@@ -188,98 +172,49 @@
             throw 'You must supply "text" parameter.';
         }
 
-        /**
-         * Set the notification to fade out after a certain amount of time
-         */
-        this.setFadeTimer = function () {
-            var that = this;
-            instance.fadeTimer = setTimeout(function () {
-                that.fade(options, false);
-            }, options.time);
-        };
-
-        /**
-         * Fade out an element after it's been on the screen for x amount of time
-         * @param params
-         * @param is_forced
-         */
-        this.fade = function (params, is_forced) {
-            var opts = $.extend(true, {}, options, params || {});
-
-            instance.callbacks.fade.apply(instance, [opts, is_forced]);
-
-            if (is_forced) {
-                instance.element.off('mouseenter mouseleave');
-            }
-
-            if (opts.fade.out.speed) {
-                instance.element.animate({
-                    opacity: 0
-                }, opts.fade.out.speed, function () {
-                    $(this).slideUp(300, function() {
-                        instance.removeElement();
-                    });
-                });
-                return;
-            }
-
-            instance.removeElement();
-        };
-
-        this.removeElement = function () {
-            instance.callbacks.before_close.apply(instance);
-            $(instance.element).remove();
-            $.witter.instances.setInactive(instance.id);
-            instance.callbacks.after_close.apply(instance);
-        };
-
-        this.restoreItemIfFading = function () {
-            clearTimeout(instance.fadeTimer);
-            instance.element.stop().css({opacity: '', height: ''});
-        };
-
         options = $.extend(true, {}, $.witter.defaults, options);
+
+        this.options = options;
 
         var instance = this;
 
-        var number = $.witter.instances.add(instance);
+        var id = $.witter.registry.add(this);
 
-        this.id = number;
+        this.id = id;
 
         this.callbacks = options.callbacks;
 
-        var image_str = (options.image != '') ? '<img src="' + options.image + '" class="witter-image" />' : '',
-            class_name = (options.image != '') ? 'witter-with-image' : 'witter-without-image';
+        var html;
 
-        if (options.title) {
-            options.title = $.witter.parse(options.templates.title, {title: options.title});
+        if (options.html) {
+            html = options.html;
+        } else {
+            var image_str = options.image ? '<img src="' + options.image + '" class="witter-image" />' : '';
+
+            html = $.witter.parse(options.templates.simple, {
+                close: options.templates.close,
+                image: image_str,
+                title: options.title,
+                text: options.text
+            });
         }
 
-        var template = options.html ? options.templates.html : options.templates.item;
-        var itemTemplate = $.witter.parse(template, {
-            title: options.title,
-            text: options.text,
-            html: options.html,
-            position: options.position,
-            close: options.templates.close,
-            image: image_str,
-            number: number,
-            class: class_name,
+        var itemTemplate = $.witter.parse(options.templates.item, {
+            html: html,
+            id: id,
             theme: options.theme
         });
 
-        if (this.callbacks.before_open.apply(instance) === false) {
-            // return prior to showing anything as before_open returned false - don't show a notification at all
+        if (this.callbacks.before_open.apply(this) === false) {
+            // if 'before_open' callback returns false - do not show at all
             return this;
         }
 
-        wrappers.find('.' + options.position).append(itemTemplate);
+        $.witter.wrappers.find('.' + options.position).append(itemTemplate);
 
-        var item = $('#witter-item-' + number);
+        this.element = $('#witter-item-' + id);
 
-        this.element = item;
-
-        item.fadeIn({
+        this.element.fadeIn({
             duration: options.fade.in.speed,
             easing: options.fade.in.easing,
             complete: function () {
@@ -291,22 +226,128 @@
             this.setFadeTimer();
         }
 
-        $(item).on('mouseenter', function () {
-            if (!options.sticky) {
+        $(this.element).on('mouseenter', function () {
+            if (!options.sticky && options.restore) {
                 instance.restoreItemIfFading();
             }
             $(this).addClass('hover');
         }).on('mouseleave', function () {
-            if (!options.sticky) {
+            if (!options.sticky && options.restore) {
                 instance.setFadeTimer(instance, options);
             }
             $(this).removeClass('hover');
         });
 
-        $(item).find(options.close_selector).click(function () {
+        $(this.element).on('click', options.close_selector, function (event) {
+            event.preventDefault();
             instance.fade(options, true);
-            return false;
         });
+    };
+
+    Witter.prototype.title = function (title) {
+        if (!title) {
+            return this.element.find('.witter-item-simple .witter-title').text();
+        }
+
+        this.element.find('.witter-item-simple .witter-title').text(title);
+
+        return this;
+    };
+
+    Witter.prototype.text = function (text) {
+        if (!text) {
+            return this.element.find('.witter-item-simple .witter-text').text();
+        }
+
+        this.element.find('.witter-item-simple .witter-text').text(text);
+
+        return this;
+    };
+
+    Witter.prototype.html = function (html) {
+        if (!html) {
+            return this.element.find('.witter-item').html();
+        }
+
+        var callback = this.callbacks.html.apply(this, [html]);
+
+        if (false === callback) {
+            // if 'html' callback returns false, do not change html
+            return;
+        }
+
+        if (callback) {
+            html = callback;
+        }
+
+        this.element.find('.witter-item').html(html);
+
+
+        return this;
+    };
+
+    Witter.prototype.remove = function (options) {
+        this.fade(true, options);
+
+        return this;
+    };
+
+    /**
+     * Set the notification to fade out after a certain amount of time
+     */
+    Witter.prototype.setFadeTimer = function () {
+        var that = this;
+        this.fadeTimer = setTimeout(function () {
+            that.fade();
+        }, this.options.time);
+
+        return this;
+    };
+
+    /**
+     * Fade out an element after it's been on the screen for x amount of time
+     * @param params
+     * @param isForced
+     */
+    Witter.prototype.fade = function (isForced, params) {
+        var opts = $.extend(true, {}, this.options, params || {});
+
+        this.callbacks.fade.apply(this, [isForced, opts]);
+
+        if (isForced) {
+            this.element.off('mouseenter mouseleave');
+            clearTimeout(this.fadeTimer);
+        }
+
+        var instance = this;
+        if (opts.fade.out.speed) {
+            this.element.animate({
+                opacity: 0
+            }, opts.fade.out.speed, function () {
+                $(this).slideUp(300, function () {
+                    instance.removeElement();
+                });
+            });
+            return;
+        }
+
+        this.removeElement();
+
+        return this;
+    };
+
+    Witter.prototype.removeElement = function () {
+        this.callbacks.before_close.apply(this);
+        $(this.element).remove();
+        $.witter.registry.setInactive(this.id);
+        this.callbacks.after_close.apply(this);
+
+        return this;
+    };
+
+    Witter.prototype.restoreItemIfFading = function () {
+        clearTimeout(this.fadeTimer);
+        this.element.stop().css({opacity: '', height: ''});
 
         return this;
     };

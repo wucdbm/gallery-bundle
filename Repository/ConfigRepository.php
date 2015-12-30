@@ -27,8 +27,6 @@ class ConfigRepository extends AbstractRepository {
         return $config;
     }
 
-    // TODO: Save if not exists from site config upon image save for the given config
-
     /**
      * @param $key
      * @return Config|null

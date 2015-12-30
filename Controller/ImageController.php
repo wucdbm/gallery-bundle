@@ -14,6 +14,7 @@ use Wucdbm\Bundle\GalleryBundle\Form\Image\SaveType;
 use Wucdbm\Bundle\GalleryBundle\Form\Image\UploadType;
 use Wucdbm\Bundle\GalleryBundle\Image\CropDimensions;
 use Wucdbm\Bundle\WucdbmBundle\Controller\BaseController;
+use Wucdbm\Bundle\WucdbmBundle\Response\FileResponse;
 
 class ImageController extends BaseController {
 
@@ -91,6 +92,7 @@ class ImageController extends BaseController {
 
         $data = [
             'config' => $config,
+            'configuration' => $config ? $manager->getConfig($config) : null,
             'name'   => $name,
             'image'  => $imagePath,
             'form'   => $form->createView(),
@@ -222,92 +224,43 @@ class ImageController extends BaseController {
     }
 
     public function serveTempAction($name) {
-        // TODO: Maybe take advantage of the serve file library?
         $manager = $this->get('wucdbm_gallery.manager.images');
         $image = $manager->getTempFilePath($name);
         $file = new File($image);
-        $response = new Response();
+        $response = new FileResponse($image);
         $response->setStatusCode(Response::HTTP_OK);
         $response->headers->set('Content-Type', $file->getMimeType());
         $response->headers->set('Content-Length', $file->getSize());
         $response->headers->set('Content-Disposition', 'inline; filename="' . $name . '"');
-        $response->setContent(readfile($image));
 
         return $response;
     }
 
-//    public function galleryAction($config) {
-//        $repo = $this->container->get('app.repo.products.images');
-//        $images = $repo->findByProductId($config);
-//
-//        $data = [
-//            'images' => $images
-//        ];
-//
-//        return $this->render('@Admin/Product/Image/gallery/gallery.html.twig', $data);
-//    }
-//
-//    public function makeImageVisibleAction(Product\Image $image) {
-//        return $this->setIsVisible($image, true);
-//    }
-//
-//    public function makeImageInvisibleAction(Product\Image $image) {
-//        return $this->setIsVisible($image, false);
-//    }
-//
-//    public function setIsVisible(Product\Image $image, $bool) {
-//        $manager = $this->container->get('app.manager.products.images');
-//        $image->setIsVisible($bool);
-//        $manager->save($image);
-//
-//        return $this->json([
-//            'success' => true,
-//            'refresh' => true
-//        ]);
-//    }
-
     /**
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function deleteAction(Product\Image $image, Request $request) {
+    public function deleteAction(Image $image, Request $request) {
         if (!$request->request->get('is_confirmed')) {
             return $this->json([
                 'success' => false
             ]);
         }
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            return $this->json([
-                'success' => false,
-                'bootbox' => 'Трябва да сте администратор, за да премахвате снимки.'
-            ]);
-        }
-        $product = $image->getProduct();
-        if ($product->getMainImage()->getId() == $image->getId()) {
-            return $this->json([
-                'success' => false,
-                'bootbox' => 'Тази снимка е главната снимка на продутка. Моля, изберете друга преди да я изтриете'
-            ]);
-        }
-        if ($product->getHoverImage()->getId() == $image->getId()) {
-            return $this->json([
-                'success' => false,
-                'bootbox' => 'Тази снимка е ховър снимка на продутка. Моля, изберете друга преди да я изтриете'
-            ]);
-        }
-        $manager = $this->container->get('app.manager.products.images');
+
+        $manager = $this->container->get('wucdbm_gallery.manager.images');
+
         try {
             $manager->remove($image);
         } catch (\Exception $ex) {
             return $this->json([
                 'success' => false,
-                'bootbox' => 'Грешка: ' . $ex->getMessage()
+                'bootbox' => 'Error: ' . $ex->getMessage()
             ]);
         }
 
         return $this->json([
             'success' => true,
-            'refresh' => true,
-            'bootbox' => 'Снимката беше успешно изтрита.'
+            'remove' => true,
+            'bootbox' => 'Image removed.'
         ]);
     }
 

@@ -21,3 +21,15 @@ body {
 .table > thead:first-child > tr:first-child > th {
     border-bottom: 0;
 }
+
+.image-holder {
+    position: relative;
+}
+
+.image-holder .actions {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    background: #fff;
+    border-bottom-left-radius: 4px;
+}

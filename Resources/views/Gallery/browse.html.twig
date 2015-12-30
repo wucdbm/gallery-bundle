@@ -12,11 +12,9 @@
             {% if images|length %}
                 {% for row in images|chunk(6) %}
                     <div class="row">
-                        {% for image in row %}
-                            <div class="col-xs-2">
-                                <img src="{{ image|wucdbmGalleryImage }}" class="img-responsive"
-                                     style="cursor: pointer;"
-                                     data-image="{{ path('wucdbm_gallery_gallery_image_json', {id: image.id}) }}" />
+                        {% for key, image in row %}
+                            <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}">
+                                {% include '@WucdbmGallery/Gallery/browse_image.html.twig' %}
                             </div>
                         {% endfor %}
                     </div>

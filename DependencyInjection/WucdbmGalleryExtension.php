@@ -22,10 +22,20 @@ class WucdbmGalleryExtension extends Extension {
 
         $bag->set('wucdbm_gallery.config', $config);
 
-        $bag->set('wucdbm_gallery.aspect_ratios', $config['aspect_ratios']);
-        $bag->set('wucdbm_gallery.sizes', $config['sizes']);
+        $ratios = $config['aspect_ratios'];
+        $sizes = $config['sizes'];
+
+        $bag->set('wucdbm_gallery.aspect_ratios', $ratios);
+        $bag->set('wucdbm_gallery.sizes', $sizes);
         $configs = $config['configs'];
         foreach ($configs as $key => $conf) {
+            $defaults = $conf['defaults'];
+            if ($defaults['ratio'] && !isset($ratios[$defaults['ratio']])) {
+                throw new \Exception(sprintf('Ratio "%s" not found in the configured ratios', $defaults['ratio']));
+            }
+            if ($defaults['size'] && !isset($sizes[$defaults['size']])) {
+                throw new \Exception(sprintf('Size "%s" not found in the configured ratios', $defaults['size']));
+            }
             $configs[$key]['key'] = $key;
         }
         $bag->set('wucdbm_gallery.configs', $configs);

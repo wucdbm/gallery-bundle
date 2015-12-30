@@ -3,6 +3,7 @@
 namespace Wucdbm\Bundle\GalleryBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
+use Wucdbm\Bundle\GalleryBundle\Entity\Image;
 use Wucdbm\Bundle\GalleryBundle\Filter\Image\ImageFilter;
 use Wucdbm\Bundle\GalleryBundle\Form\Image\FilterType;
 use Wucdbm\Bundle\WucdbmBundle\Controller\BaseController;
@@ -44,6 +45,14 @@ class GalleryController extends BaseController {
         ];
 
         return $this->json($data);
+    }
+
+    public function refreshAction(Image $image) {
+        $data = [
+            'image' => $image
+        ];
+
+        return $this->render('@WucdbmGallery/Gallery/browse_image.html.twig', $data);
     }
 
 }

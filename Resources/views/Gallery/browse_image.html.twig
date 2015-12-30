@@ -1,0 +1,18 @@
+<div class="image-holder thumbnail">
+    <div class="actions">
+        <a href="{{ path('wucdbm_gallery_image_delete', {id: image.id}) }}"
+           class="btn btn-link btn-xs"
+           data-confirm="Are you sure you want to delete Image {{ image.name }}"
+           rel="tooltip" title="Delete">
+            <i class="fa fa-times"></i>
+        </a>
+        <a href="{{ path('wucdbm_gallery_image_edit', {id: image.id}) }}"
+           class="btn btn-link btn-xs"
+           rel="tooltip" title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+    </div>
+    <img src="{{ image|wucdbmGalleryImage }}" class="img-responsive"
+         style="cursor: pointer;"
+         data-image="{{ path('wucdbm_gallery_gallery_image_json', {id: image.id}) }}" />
+</div>

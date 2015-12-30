@@ -5,3 +5,7 @@ wucdbm_gallery_gallery_gallery:
 wucdbm_gallery_gallery_image_json:
       path:      /image/{id}/json
       defaults:  { _controller: WucdbmGalleryBundle:Gallery:imageJson }
+
+wucdbm_gallery_gallery_gallery_refresh:
+      path:      /{id}/refresh
+      defaults:  { _controller: WucdbmGalleryBundle:Gallery:refresh }

@@ -2,7 +2,6 @@
 
 namespace Wucdbm\Bundle\GalleryBundle\Manager;
 
-use Doctrine\ORM\PersistentCollection;
 use Intervention\Image\ImageManagerStatic;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -12,19 +11,6 @@ use Wucdbm\Bundle\GalleryBundle\Image\CropDimensions;
 use Wucdbm\Bundle\WucdbmBundle\Manager\AbstractManager;
 
 /**
- * TODO: Subdir strategies:
- * 1. none
- * 2. date
- * 3. id%something
- * 4. custom
- * dir_structure:
- *      strategy: id%something
- *      options:
- *          some: option // use options resolver here
- * TODO: Default aspect ratio
- * strategies:
- *      delenie ostatyk
- *      dati
  * Class ImageManager
  * @package Wucdbm\Bundle\GalleryBundle\Manager
  */
@@ -205,9 +191,6 @@ class ImageManager extends AbstractManager {
             unlink($path);
         }
     }
-
-
-    // TODO: Down below
 
     protected function getImageName(Image $image) {
         $extension = image_type_to_extension($image->getExtension());
