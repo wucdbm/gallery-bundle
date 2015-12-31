@@ -10,7 +10,7 @@
             <hr>
 
             {% if images|length %}
-                {% for row in images|chunk(6) %}
+                {% for row in images|array_chunk(6) %}
                     <div class="row">
                         {% for key, image in row %}
                             <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}">
