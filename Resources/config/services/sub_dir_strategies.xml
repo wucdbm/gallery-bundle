@@ -6,10 +6,13 @@
 
         <service id="wucdbm_gallery.image.sub_dir_strategy.container" class="Wucdbm\Bundle\GalleryBundle\Image\SubDirStrategy\StrategyContainer"/>
 
+        <service id="wucdbm_gallery.image.sub_dir_strategy.identifier" class="Wucdbm\Bundle\GalleryBundle\Image\SubDirStrategy\IdentifierStrategy">
+            <tag name="wucdbm_gallery.sub_dir_strategy"/>
+        </service>
         <service id="wucdbm_gallery.image.sub_dir_strategy.date" class="Wucdbm\Bundle\GalleryBundle\Image\SubDirStrategy\DateStrategy">
             <tag name="wucdbm_gallery.sub_dir_strategy"/>
         </service>
-        <service id="wucdbm_gallery.image.sub_dir_strategy.identifier" class="Wucdbm\Bundle\GalleryBundle\Image\SubDirStrategy\IdentifierStrategy">
+        <service id="wucdbm_gallery.image.sub_dir_strategy.none" class="Wucdbm\Bundle\GalleryBundle\Image\SubDirStrategy\NoneStrategy">
             <tag name="wucdbm_gallery.sub_dir_strategy"/>
         </service>
 
