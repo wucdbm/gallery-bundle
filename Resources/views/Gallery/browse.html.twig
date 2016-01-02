@@ -13,7 +13,7 @@
                 {% for row in images|array_chunk(6) %}
                     <div class="row">
                         {% for key, image in row %}
-                            <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}">
+                            <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}" data-preview="{{ image|wucdbmGalleryImage }}">
                                 {% include '@WucdbmGallery/Gallery/browse_image.html.twig' %}
                             </div>
                         {% endfor %}
@@ -24,6 +24,36 @@
             {% endif %}
         </div>
     </div>
+
+    <style>
+        .preview-container {
+            display: none;
+            position: absolute;
+        }
+
+        .preview-container .wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-container .wrapper img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 !important;
+        }
+
+        .preview-container.max-height img {
+            height: 100%;
+            width: auto;
+        }
+
+        .preview-container.max-width img {
+            height: auto;
+            width: 100%;
+        }
+    </style>
 
     <div class="row">
         {% include '@WucdbmGallery/_shared/pagination.html.twig' %}
@@ -37,3 +67,6 @@
     </li>
 {% endblock %}
 
+{% block scripts %}
+    $.preview();
+{% endblock %}
