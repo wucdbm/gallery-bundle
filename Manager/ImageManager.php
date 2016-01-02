@@ -167,7 +167,7 @@ class ImageManager extends AbstractManager {
     public function getImageDirectory(Image $image) {
         $imagesDir = $this->getImagesDir();
         $path = $this->getImageSubDir($image);
-        $dir = $imagesDir . DIRECTORY_SEPARATOR . $path;
+        $dir = $imagesDir . ($path ? DIRECTORY_SEPARATOR . $path : '');
 
         return $dir;
     }
@@ -205,7 +205,7 @@ class ImageManager extends AbstractManager {
         $subDir = $this->getImageSubDir($image);
         $name = $this->getImageName($image);
 
-        return $host . '/' . $subDir . '/' . $name;
+        return $host . '/' . ($subDir ? $subDir . '/' : '') . $name;
     }
 
     public function getImagePath(Image $image) {
