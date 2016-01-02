@@ -5,7 +5,11 @@
 
         if (!element.data('natural-width') || !element.data('natural-height')) {
             console.log('not loaded yet - return');
-            return;
+            return {
+                width: null,
+                height: null,
+                class: ''
+            };
         }
 
         var naturalWidth = element.data('natural-width');
