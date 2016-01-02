@@ -4,7 +4,6 @@
         element = $(element);
 
         if (!element.data('natural-width') || !element.data('natural-height')) {
-            console.log('not loaded yet - return');
             return {
                 width: null,
                 height: null,
