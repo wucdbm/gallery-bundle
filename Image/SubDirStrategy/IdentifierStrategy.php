@@ -7,7 +7,7 @@ use Wucdbm\Bundle\GalleryBundle\Entity\Image;
 class IdentifierStrategy extends AbstractSubDirStrategy {
 
     protected $defaults = [
-        'dirs' => 100
+        'dirs' => 128
     ];
 
     public function doGetSubDirectory(Image $image, array $options) {

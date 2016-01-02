@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface {
                                 ->addDefaultsIfNotSet()
                                 ->children()
                                     ->variableNode('name')->defaultValue('identifier')->end()
-                                    ->variableNode('options')->defaultValue(['dirs' => 128])->end()
+                                    ->variableNode('options')->defaultValue([])->end()
                                 ->end()
                             ->end()
                             ->arrayNode('defaults')
