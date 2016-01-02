@@ -16,7 +16,6 @@ class FilterType extends BaseFilterType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $builder
-            // todo: add config
             ->add('name', TextFilterType::class, [
                 'placeholder' => 'Name'
             ])

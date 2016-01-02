@@ -43,6 +43,7 @@ class WucdbmGalleryExtension extends Extension {
         $loader->load('services/forms.xml');
         $loader->load('services/managers.xml');
         $loader->load('services/repositories.xml');
+        $loader->load('services/sub_dir_strategies.xml');
         $loader->load('services/twig.xml');
     }
 

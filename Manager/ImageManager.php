@@ -173,10 +173,11 @@ class ImageManager extends AbstractManager {
     }
 
     protected function getImageSubDir(Image $image) {
-        // TODO: Add config option - mandatory, this should be selected based on the current image sub dir strategy config
-        $subDir = $image->getId() % 100;
+        $config = $this->getConfig($image->getConfig()->getKey());
+        $strategy = $config['strategy'];
+        $impl = $this->container->get('wucdbm_gallery.image.sub_dir_strategy.container')->getStrategy($strategy['name']);
 
-        return $subDir . DIRECTORY_SEPARATOR . $image->getId();
+        return $impl->getSubDirectory($image, $strategy['options']);
     }
 
     protected function getImagesDir() {

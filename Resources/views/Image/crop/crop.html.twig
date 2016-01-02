@@ -107,176 +107,176 @@
 {% endblock %}
 
 {% block scripts %}
-        var jcrop_api;
+    var jcrop_api;
 
-        $.blockUI({
-            message: 'Please wait until image loads.'
-        });
+    $.blockUI({
+        message: 'Please wait until image loads.'
+    });
 
-        $(window).load(function() {
-            $('#image').Jcrop({
-                onChange:   onChange,
-                onSelect:   onSelect,
-                onRelease:  onRelease,
-                trueSize: getTrueSize(),
-                minSize: [ 120, 120 ],
-                //maxSize: [ 1920, 1080 ],
-                aspectRatio: $('.aspect-ratio-button').first().data('aspect-ratio'),
-                //setSelect:   [ 100, 100, 50, 50 ],
-                bgFade: true
-                //allowSelect: false
-            }, function() {
-                jcrop_api = this;
-                $.unblockUI();
-                var naturalSize = getTrueSize();
-                jcrop_api.setSelect([0,0,naturalSize[0],naturalSize[1]]);
+    $(window).load(function() {
+        $('#image').Jcrop({
+            onChange:   onChange,
+            onSelect:   onSelect,
+            onRelease:  onRelease,
+            trueSize: getTrueSize(),
+            minSize: [ 120, 120 ],
+            //maxSize: [ 1920, 1080 ],
+            aspectRatio: $('.aspect-ratio-button').first().data('aspect-ratio'),
+            //setSelect:   [ 100, 100, 50, 50 ],
+            bgFade: true
+            //allowSelect: false
+        }, function() {
+            jcrop_api = this;
+            $.unblockUI();
+            var naturalSize = getTrueSize();
+            jcrop_api.setSelect([0,0,naturalSize[0],naturalSize[1]]);
 
 
 
-                {% if configuration %}
-                    {% if configuration.defaults.ratio %}
-                        $('#ratio-button-{{ configuration.defaults.ratio }}').trigger('click');
-                    {% endif %}
-                    {% if configuration.defaults.ratio %}
-                        $('#size-button-{{ configuration.defaults.size }}').trigger('click');
-                    {% endif %}
+            {% if configuration %}
+                {% if configuration.defaults.ratio %}
+                    $('#ratio-button-{{ configuration.defaults.ratio }}').trigger('click');
                 {% endif %}
-            });
+                {% if configuration.defaults.ratio %}
+                    $('#size-button-{{ configuration.defaults.size }}').trigger('click');
+                {% endif %}
+            {% endif %}
         });
+    });
 
-        $('.aspect-ratio-button').click(function(e) {
-            var button = $(this);
-            var ratio = button.data('aspect-ratio');
+    $('.aspect-ratio-button').click(function(e) {
+        var button = $(this);
+        var ratio = button.data('aspect-ratio');
+        jcrop_api.setOptions({
+            aspectRatio: ratio
+        });
+        $('.aspect-ratio-button').removeClass('btn-primary');
+        button.addClass('btn-primary');
+    });
+
+    $('.full-width').click(function(e) {
+        var x1 = 0,
+                x2 = document.getElementById('image').naturalWidth,
+                y1 = $('#{{ form.y1.vars.id }}').val(),
+                y2 = $('#{{ form.y2.vars.id }}').val();
+        jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.full-height').click(function(e) {
+        var x1 = $('#{{ form.x1.vars.id }}').val(),
+                x2 = $('#{{ form.x2.vars.id }}').val(),
+                y1 = 0,
+                y2 = document.getElementById('image').naturalHeight;
+        jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.fit-width-height').click(function(e) {
+        var x1 = 0,
+                x2 = document.getElementById('image').naturalWidth,
+                y1 = 0,
+                y2 = document.getElementById('image').naturalHeight;
+        jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    $('.max-size-button').click(function(e) {
+        var set = $(this).hasClass('btn-primary');
+        $('.max-size-button').removeClass('btn-primary');
+        if (set) {
             jcrop_api.setOptions({
-                aspectRatio: ratio
+                maxSize: [ 0, 0 ]
             });
-            $('.aspect-ratio-button').removeClass('btn-primary');
-            button.addClass('btn-primary');
-        });
+            $(this).removeClass('btn-primary');
+        } else {
+            if ($(this).data('aspect-ratio-button')) {
+                $('#'+$(this).data('aspect-ratio-button')).trigger('click');
+            }
+            jcrop_api.setOptions({
+                maxSize: [ $(this).data('max-width'), $(this).data('max-height') ]
+            });
+            $(this).addClass('btn-primary');
+        }
+        jcrop_api.focus();
+    });
 
-        $('.full-width').click(function(e) {
-            var x1 = 0,
-                    x2 = document.getElementById('image').naturalWidth,
-                    y1 = $('#{{ form.y1.vars.id }}').val(),
-                    y2 = $('#{{ form.y2.vars.id }}').val();
-            jcrop_api.setSelect([x1,y1,x2,y2]);
+    $('#cropAndPreview').click(function(e) {
+        e.preventDefault();
+        var form = $(this).parents('form');
+        $.blockUI({
+            message: 'Please wait while your image is being processed. <br> This might take up to a few seconds depending on its size.'
         });
-
-        $('.full-height').click(function(e) {
-            var x1 = $('#{{ form.x1.vars.id }}').val(),
-                    x2 = $('#{{ form.x2.vars.id }}').val(),
-                    y1 = 0,
-                    y2 = document.getElementById('image').naturalHeight;
-            jcrop_api.setSelect([x1,y1,x2,y2]);
-        });
-
-        $('.fit-width-height').click(function(e) {
-            var x1 = 0,
-                    x2 = document.getElementById('image').naturalWidth,
-                    y1 = 0,
-                    y2 = document.getElementById('image').naturalHeight;
-            jcrop_api.setSelect([x1,y1,x2,y2]);
-        });
-
-        $('.max-size-button').click(function(e) {
-            var set = $(this).hasClass('btn-primary');
-            $('.max-size-button').removeClass('btn-primary');
-            if (set) {
-                jcrop_api.setOptions({
-                    maxSize: [ 0, 0 ]
-                });
-                $(this).removeClass('btn-primary');
+        $.ajax({
+            url: '{{ path('wucdbm_gallery_image_crop_and_preview', {config: config, name: name}) }}',
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json'
+        }).done(function(data) {
+            if (data.success) {
+                var modal = $('#previewModal');
+                modal.find('img.preview-img').attr('src', data.url);
+                modal.modal();
             } else {
-                if ($(this).data('aspect-ratio-button')) {
-                    $('#'+$(this).data('aspect-ratio-button')).trigger('click');
-                }
-                jcrop_api.setOptions({
-                    maxSize: [ $(this).data('max-width'), $(this).data('max-height') ]
-                });
-                $(this).addClass('btn-primary');
+                bootbox.alert(data.error);
             }
-            jcrop_api.focus();
+            $.unblockUI();
         });
+    });
 
-        $('#cropAndPreview').click(function(e) {
-            e.preventDefault();
-            var form = $(this).parents('form');
-            $.blockUI({
-                message: 'Please wait while your image is being processed. <br> This might take up to a few seconds depending on its size.'
+    $('#{{ form.vars.id }}').on('change','input.jcrop-coord',function(e){
+        var x1 = $('#{{ form.x1.vars.id }}').val(),
+                x2 = $('#{{ form.x2.vars.id }}').val(),
+                y1 = $('#{{ form.y1.vars.id }}').val(),
+                y2 = $('#{{ form.y2.vars.id }}').val();
+        jcrop_api.setSelect([x1,y1,x2,y2]);
+    });
+
+    function onChange(c) {
+        showCoords(c);
+        //updatePreview(c);
+    };
+
+    function onSelect(c) {
+        showCoords(c);
+        //updatePreview(c);
+    };
+
+    function onRelease(c) {
+        clearCoords();
+    };
+
+    // Simple event handler, called from onChange and onSelect
+    // event handlers, as per the Jcrop invocation above
+    function showCoords(c) {
+        $('#{{ form.x1.vars.id }}').val(parseInt(c.x));
+        $('#{{ form.y1.vars.id }}').val(parseInt(c.y));
+        $('#{{ form.x2.vars.id }}').val(parseInt(c.x2));
+        $('#{{ form.y2.vars.id }}').val(parseInt(c.y2));
+        $('#{{ form.width.vars.id }}').val(parseInt(c.w));
+        $('#{{ form.height.vars.id }}').val(parseInt(c.h));
+    };
+
+    function clearCoords() {
+        $('#coords input').val('');
+    };
+
+    function getTrueSize() {
+        var nWidth = document.getElementById('image').naturalWidth,
+                nHeight = document.getElementById('image').naturalHeight;
+        return [nWidth, nHeight];
+    };
+
+    function updatePreview(c) {
+        if (parseInt(c.w) > 0) {
+            var rx = xsize / c.w;
+            var ry = ysize / c.h;
+
+            $pimg.css({
+                width: Math.round(rx * boundx) + 'px',
+                height: Math.round(ry * boundy) + 'px',
+                marginLeft: '-' + Math.round(rx * c.x) + 'px',
+                marginTop: '-' + Math.round(ry * c.y) + 'px'
             });
-            $.ajax({
-                url: '{{ path('wucdbm_gallery_image_crop_and_preview', {config: config, name: name}) }}',
-                type: 'POST',
-                data: form.serialize(),
-                dataType: 'json'
-            }).done(function(data) {
-                if (data.success) {
-                    var modal = $('#previewModal');
-                    modal.find('img.preview-img').attr('src', data.url);
-                    modal.modal();
-                } else {
-                    bootbox.alert(data.error);
-                }
-                $.unblockUI();
-            });
-        });
-
-        $('#{{ form.vars.id }}').on('change','input.jcrop-coord',function(e){
-            var x1 = $('#{{ form.x1.vars.id }}').val(),
-                    x2 = $('#{{ form.x2.vars.id }}').val(),
-                    y1 = $('#{{ form.y1.vars.id }}').val(),
-                    y2 = $('#{{ form.y2.vars.id }}').val();
-            jcrop_api.setSelect([x1,y1,x2,y2]);
-        });
-
-        function onChange(c) {
-            showCoords(c);
-            //updatePreview(c);
-        };
-
-        function onSelect(c) {
-            showCoords(c);
-            //updatePreview(c);
-        };
-
-        function onRelease(c) {
-            clearCoords();
-        };
-
-        // Simple event handler, called from onChange and onSelect
-        // event handlers, as per the Jcrop invocation above
-        function showCoords(c) {
-            $('#{{ form.x1.vars.id }}').val(parseInt(c.x));
-            $('#{{ form.y1.vars.id }}').val(parseInt(c.y));
-            $('#{{ form.x2.vars.id }}').val(parseInt(c.x2));
-            $('#{{ form.y2.vars.id }}').val(parseInt(c.y2));
-            $('#{{ form.width.vars.id }}').val(parseInt(c.w));
-            $('#{{ form.height.vars.id }}').val(parseInt(c.h));
-        };
-
-        function clearCoords() {
-            $('#coords input').val('');
-        };
-
-        function getTrueSize() {
-            var nWidth = document.getElementById('image').naturalWidth,
-                    nHeight = document.getElementById('image').naturalHeight;
-            return [nWidth, nHeight];
-        };
-
-        function updatePreview(c) {
-            if (parseInt(c.w) > 0) {
-                var rx = xsize / c.w;
-                var ry = ysize / c.h;
-
-                $pimg.css({
-                    width: Math.round(rx * boundx) + 'px',
-                    height: Math.round(ry * boundy) + 'px',
-                    marginLeft: '-' + Math.round(rx * c.x) + 'px',
-                    marginTop: '-' + Math.round(ry * c.y) + 'px'
-                });
-            }
-        };
+        }
+    };
 {% endblock %}
 
 {% block breadcrumb %}
