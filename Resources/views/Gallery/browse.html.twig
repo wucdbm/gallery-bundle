@@ -13,7 +13,8 @@
                 {% for row in images|array_chunk(6) %}
                     <div class="row">
                         {% for key, image in row %}
-                            <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}" data-preview="{{ image|wucdbmGalleryImage }}">
+                            <div class="col-xs-2" data-refresh="{{ path('wucdbm_gallery_gallery_gallery_refresh', {id: image.id}) }}" data-preview="{{ image|wucdbmGalleryImage }}"
+                            data-alt="{{ image.alt }}" data-name="{{ image.name }}" data-date="{{ image.dateUploaded|date('j F Y') }}" data-width="{{ image.width }}" data-height="{{ image.height }}">
                                 {% include '@WucdbmGallery/Gallery/browse_image.html.twig' %}
                             </div>
                         {% endfor %}
@@ -53,6 +54,15 @@
             height: auto;
             width: 100%;
         }
+
+        /*#witter-wrappers div.top {*/
+            /*top: 15px;*/
+            /*right: 15px;*/
+            /*bottom: auto;*/
+            /*left: 15px;*/
+            /*width: 600px;*/
+            /*margin: auto;*/
+        /*}*/
     </style>
 
     <div class="row">
@@ -68,5 +78,71 @@
 {% endblock %}
 
 {% block scripts %}
-    $.preview();
+
+    var notification = null;
+    var timeout = null;
+
+    function notificationTitle(element) {
+        var alt = $(element).data('alt');
+
+        return alt;
+    }
+
+    function notificationText(element) {
+        var name = $(element).data('name');
+        var date = $(element).data('date');
+        var width = $(element).data('width');
+        var height = $(element).data('height');
+
+        return name + '<br/>' + date + '<br/>Width ' + width + ' Height '+height;
+    }
+
+    function updateNotification(element, size) {
+        // either use the fade callback or use notification.restoreItemIfFading();
+        if (null === notification) {
+            notification = $.witter({
+                sticky: true,
+                {#position: 'top',#}
+                callbacks: {
+                    before_close: function() {
+                        notification = null;
+                    }
+                }
+            });
+        }
+        notification.restoreItemIfFading();
+        notification.title(notificationTitle(element));
+        var text = notificationText(element);
+        if (size) {
+            text += "<br/>Scaled to ";
+            sizes = [];
+            if (size.width) {
+                sizes.push('width: '+size.width);
+            }
+            if (size.height) {
+                sizes.push('width: '+size.height);
+            }
+            text += sizes.join(', ');
+        }
+        notification.text(text, true);
+    }
+
+    $.preview({
+        handlers: {
+            open: function(event, options) {
+                clearTimeout(timeout);
+                updateNotification(this);
+            },
+            close: function(event, options) {
+                timeout = setTimeout(function() {
+                    if (notification) {
+                        notification.remove();
+                    }
+                }, 250);
+            },
+            hover: function(event, options, size) {
+                updateNotification(this, size);
+            }
+        }
+    });
 {% endblock %}

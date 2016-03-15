@@ -244,9 +244,14 @@
         });
     };
 
-    Witter.prototype.title = function (title) {
+    Witter.prototype.title = function (title, isHtml) {
         if (!title) {
             return this.element.find('.witter-item-simple .witter-title').text();
+        }
+
+        if (isHtml) {
+            this.element.find('.witter-item-simple .witter-title').html(title);
+            return this;
         }
 
         this.element.find('.witter-item-simple .witter-title').text(title);
@@ -254,9 +259,14 @@
         return this;
     };
 
-    Witter.prototype.text = function (text) {
+    Witter.prototype.text = function (text, isHtml) {
         if (!text) {
             return this.element.find('.witter-item-simple .witter-text').text();
+        }
+
+        if (isHtml) {
+            this.element.find('.witter-item-simple .witter-text').html(text);
+            return this;
         }
 
         this.element.find('.witter-item-simple .witter-text').text(text);
@@ -287,6 +297,9 @@
     };
 
     Witter.prototype.remove = function (options) {
+        if (!this.fade) {
+            console.log(this);
+        }
         this.fade(true, options);
 
         return this;

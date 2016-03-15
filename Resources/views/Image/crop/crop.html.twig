@@ -21,19 +21,9 @@
                     <button type="submit" id="cropAndPreview" name="cropAndPreview" class="btn btn-default" rel="tooltip" title="Crop and preview the new image">
                         Preview
                     </button>
-                    {{ form_widget(form.cropAndSave) }}
-                    {% if false %}
-                        <a href="javascript:;" class="btn btn-primary">
-                            <i class="fa fa-edit"></i> Crop & Edit {# save in temp dir and crop #}
-                        </a>
-                        <a href="javascript:;" class="btn purple">
-                            <i class="fa fa-search"></i> Прегледай {# modal #}
-                        </a>
-                        <a href="{{ path('wucdbm_gallery_image_save', {id: product.id, name: name}) }}" class="btn green">
-                            <i class="fa fa-save"></i>
-                            Запази
-                        </a>
-                    {% endif %}
+                    <button type="submit" id="cropAndSave" name="cropAndSave" class="btn btn-default" rel="tooltip" title="Crop and save">
+                        Save
+                    </button>
                 </div>
             </div>
 

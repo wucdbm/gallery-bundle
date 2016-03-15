@@ -111,14 +111,6 @@ class CropType extends AbstractType {
                         'message' => 'Y2 is required'
                     ])
                 ]
-            ])
-            ->add('cropAndSave', SubmitType::class, [
-                'attr'  => [
-                    'class' => 'btn btn-success',
-                    'rel'   => 'tooltip',
-                    'title' => 'Запис на снимката - преминава се към страничката за записване на данните на снимката'
-                ],
-                'label' => 'Запис'
             ]);
     }
 

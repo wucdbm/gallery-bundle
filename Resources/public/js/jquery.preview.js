@@ -20,7 +20,13 @@
         var width = $(window).width();
         var height = $(window).height();
 
-        var availableWidth = width - pageX - options.offsetX;
+        var availableWidth;
+        if (pageX > width / 2) {
+            availableWidth = pageX - options.offsetX;
+        } else {
+            availableWidth = width - pageX - options.offsetX;
+        }
+
         var availableHeight = height - pageY - options.offsetY;
 
         if (availableWidth > naturalWidth && availableHeight > naturalHeight) {
@@ -75,17 +81,30 @@
                 .css('top', (e.pageY - options.offsetX) + 'px')
                 .css('left', (e.pageX + options.offsetY) + 'px')
                 .fadeIn('fast');
-        }).on('mouseout', options.selector, function () {
+            options.handlers.open.apply(this, [e, options]);
+        }).on('mouseout', options.selector, function (e) {
             var element = $(this).data('preview-element');
             $(element).remove();
             $(this).data('preview-element', null);
+            options.handlers.close.apply(this, [e, options]);
         }).on('mousemove', options.selector, function (e) {
             var element = $(this).data('preview-element');
             if (element) {
-                element.css('top', (e.pageY - options.offsetY) + 'px')
-                    .css('left', (e.pageX + options.offsetX) + 'px');
+                element.css('top', (e.pageY - options.offsetY) + 'px');
 
-                var size = options.size(e, this, options);
+                var pageX = e.pageX;
+                var width = $(window).width();
+                if (pageX > width / 2) {
+                    element.css('right', (width - pageX + options.offsetX) + 'px')
+                        .css('left', 'auto')
+                        .find('img').css('float', 'right');
+                } else {
+                    element.css('left', (pageX + options.offsetX) + 'px')
+                        .css('right', 'auto')
+                        .find('img').css('float', 'left');
+                }
+
+                var size = options.handlers.size(e, this, options);
 
                 element.css('width', '')
                     .css('height', '')
@@ -97,6 +116,8 @@
                 if (size.height) {
                     element.css('height', size.height + 'px');
                 }
+
+                options.handlers.hover.apply(this, [e, options, size]);
             }
         });
     };
@@ -105,7 +126,18 @@
         selector: '[data-preview]',
         offsetX: 15,
         offsetY: 5,
-        size: sizeHandler
+        handlers: {
+            size: sizeHandler,
+            open: function() {
+                //
+            },
+            close: function(event, options) {
+                //
+            },
+            hover: function(event, options, size) {
+                // size as provided by the size handler
+            }
+        }
     };
 
 })(jQuery || Zepto);
