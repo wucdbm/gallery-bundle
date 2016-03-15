@@ -1,0 +1,47 @@
+{% block wucdbm_gallery_html %}
+    <a href="{{ path('wucdbm_gallery_gallery_gallery') }}" class="btn btn-link" target="_blank">
+        Gallery in new window
+    </a>
+
+    <br>
+
+    <a href="{{ path('wucdbm_gallery_gallery_gallery') }}" class="btn btn-link test-gallery" target="_blank">
+        Gallery in magnificPopup
+    </a>
+
+    <div id="wucdbmGalleryPictureContainer">
+
+    </div>
+{% endblock %}
+
+{% block wucdbm_gallery_scripts %}
+    $('.test-gallery').magnificPopup({
+        type: 'iframe',
+        iframe: {
+            patterns: {
+                sfbg: {
+                    index: 'sfbg',
+                    id: function(url) {
+                        return url;
+                    },
+                    src: '%id%'
+                }
+            }
+        }
+    });
+
+
+    $(document).on('wucdbm.gallery.image', function(event, image, parentWindow) {
+        console.log(event);
+        console.log(image);
+        console.log(parentWindow);
+        var img = $('<img />');
+        img.attr('src', image.url);
+        img.attr('alt', image.name);
+        img.attr('class', 'img-responsive');
+        var rawHtml = $('<div/>').append(img.clone()).html();
+        $('#wucdbmGalleryPictureContainer').append(rawHtml);
+        $.magnificPopup.close();
+        parentWindow.close();
+    });
+{% endblock %}

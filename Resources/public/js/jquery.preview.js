@@ -27,7 +27,7 @@
             availableWidth = width - pageX - options.offsetX;
         }
 
-        var availableHeight = height - pageY - options.offsetY;
+        var availableHeight = height - pageY + options.offsetY;
 
         if (availableWidth > naturalWidth && availableHeight > naturalHeight) {
             return {
