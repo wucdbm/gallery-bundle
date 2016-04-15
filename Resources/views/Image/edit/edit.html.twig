@@ -3,7 +3,8 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-4">
-            <img src="{{ image|wucdbmGalleryImage }}" id="image" class="img-responsive"/>
+            <img src="{{ image|wucdbmGalleryImage }}" id="image" class="img-responsive" style="cursor: pointer;"
+                 data-image="{{ path('wucdbm_gallery_gallery_image_json', {id: image.id}) }}"/>
         </div>
         <div class="col-lg-8">
             {% form_theme form '@WucdbmGallery/_shared/form/form_theme.html.twig' %}
@@ -20,6 +21,12 @@
 {% endblock %}
 
 {% block breadcrumb %}
+    <li class="pull-right">
+        <a href="javascript:;" data-image="{{ path('wucdbm_gallery_gallery_image_json', {id: image.id}) }}">
+            <i class="fa fa-file-image-o"></i>
+            Use image
+        </a>
+    </li>
     {{ parent() }}
     <li>
         #{{ image.id }} - {{ image.name }}
