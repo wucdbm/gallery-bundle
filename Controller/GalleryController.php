@@ -40,6 +40,7 @@ class GalleryController extends BaseController {
             'width'         => $image->getWidth(),
             'height'        => $image->getHeight(),
             'name'          => $image->getName(),
+            'alt'           => $image->getAlt(),
             'path'          => $manager->getImagePath($image),
             'url'           => $manager->getImageUrl($image)
         ];
