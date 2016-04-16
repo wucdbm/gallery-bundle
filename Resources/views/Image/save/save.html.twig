@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row">
         <div class="col-lg-4">
-            <img src="{{ path('wucdbm_gallery_image_serve_temp', {name: name}) }}" id="image" class="img-responsive"/>
+            <img src="{{ path('wucdbm_gallery_image_serve_temp', {config: config, name: name}) }}" id="image" class="img-responsive"/>
         </div>
         <div class="col-lg-8">
             {% if image.id %}

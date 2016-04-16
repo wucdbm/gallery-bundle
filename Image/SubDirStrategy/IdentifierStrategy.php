@@ -10,7 +10,7 @@ class IdentifierStrategy extends AbstractSubDirStrategy {
         'dirs' => 128
     ];
 
-    public function doGetSubDirectory(Image $image, array $options) {
+    protected function doGetSubDirectory(Image $image, array $options) {
         $subDir = $image->getId() % $options['dirs'];
 
         return $subDir . DIRECTORY_SEPARATOR . $image->getId();

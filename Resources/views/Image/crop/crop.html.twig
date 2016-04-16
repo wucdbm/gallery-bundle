@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row">
         <div class="col-md-9">
-            <img src="{{ path('wucdbm_gallery_image_serve_temp', {name: name}) }}" id="image" class="img-responsive"/>
+            <img src="{{ path('wucdbm_gallery_image_serve_temp', {config: config, name: name}) }}" id="image" class="img-responsive"/>
         </div>
         <div class="col-md-3">
             {% if error %}
@@ -48,11 +48,11 @@
 
             <h5>Aspect Ratios</h5>
             <div class="btn-group">
-                <a href="javascript:;" class="btn btn-default {% if configuration and not configuration.defaults.ratio %} btn-primary{% endif %} aspect-ratio-button" data-aspect-ratio="0">
+                <a href="javascript:;" class="btn btn-default {% if configuration and configuration.defaults.ratio is not defined %} btn-primary{% endif %} aspect-ratio-button" data-aspect-ratio="0">
                     Release
                 </a>
                 {% for name, ratio in ratios %}
-                    <a href="javascript:;" class="btn btn-default {% if configuration and configuration.defaults.ratio == name %} btn-primary{% endif %} aspect-ratio-button"
+                    <a href="javascript:;" class="btn btn-default {% if configuration and configuration.defaults.ratio is defined and configuration.defaults.ratio == name %} btn-primary{% endif %} aspect-ratio-button"
                        id="ratio-button-{{ name }}"
                        rel="tooltip" title="{{ ratio.width }}:{{ ratio.height }}"
                        data-aspect-ratio="{{ ratio.width / ratio.height }}">
@@ -67,7 +67,7 @@
                 <h5>Sizes</h5>
                 <div class="btn-group">
                     {% for name, size in sizes %}
-                        <a href="javascript:;" class="btn btn-default {% if configuration and configuration.defaults.size == name %} btn-primary{% endif %} max-size-button"
+                        <a href="javascript:;" class="btn btn-default {% if configuration and configuration.defaults.size is defined and configuration.defaults.size == name %} btn-primary{% endif %} max-size-button"
                            id="size-button-{{ name }}"
                            data-max-width="{{ size.width }}" data-max-height="{{ size.height }}"
                            rel="tooltip" title="{{ size.width }}x{{ size.height }}">
@@ -124,10 +124,10 @@
 
 
             {% if configuration %}
-                {% if configuration.defaults.ratio %}
+                {% if configuration.defaults.ratio is defined %}
                     $('#ratio-button-{{ configuration.defaults.ratio }}').trigger('click');
                 {% endif %}
-                {% if configuration.defaults.ratio %}
+                {% if configuration.defaults.size is defined %}
                     $('#size-button-{{ configuration.defaults.size }}').trigger('click');
                 {% endif %}
             {% endif %}

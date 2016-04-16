@@ -3,6 +3,7 @@
 namespace Wucdbm\Bundle\GalleryBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -63,6 +64,25 @@ class Image {
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id")
      */
     protected $config;
+
+    /**
+     * @var UploadedFile
+     */
+    protected $file;
+
+    /**
+     * @return UploadedFile
+     */
+    public function getFile() {
+        return $this->file;
+    }
+
+    /**
+     * @param UploadedFile $file
+     */
+    public function setFile($file) {
+        $this->file = $file;
+    }
 
     /**
      * Constructor

@@ -11,7 +11,7 @@ wucdbm_gallery_image_crop_and_preview:
       defaults:  { _controller: WucdbmGalleryBundle:Image:cropAndPreview, config: null }
 
 wucdbm_gallery_image_serve_temp:
-      path:      /temp/{name}
+      path:      /{config}/temp/{name}
       defaults:  { _controller: WucdbmGalleryBundle:Image:serveTemp }
 
 wucdbm_gallery_image_save:

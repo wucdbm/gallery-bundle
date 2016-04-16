@@ -3,10 +3,9 @@
 namespace Wucdbm\Bundle\GalleryBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Wucdbm\Bundle\GalleryBundle\Entity\Image;
 use Wucdbm\Bundle\GalleryBundle\Exception\ConfigNotFoundException;
 use Wucdbm\Bundle\GalleryBundle\Form\Image\CropType;
@@ -14,7 +13,6 @@ use Wucdbm\Bundle\GalleryBundle\Form\Image\SaveType;
 use Wucdbm\Bundle\GalleryBundle\Form\Image\UploadType;
 use Wucdbm\Bundle\GalleryBundle\Image\CropDimensions;
 use Wucdbm\Bundle\WucdbmBundle\Controller\BaseController;
-use Wucdbm\Bundle\WucdbmBundle\Response\FileResponse;
 
 class ImageController extends BaseController {
 
@@ -26,8 +24,9 @@ class ImageController extends BaseController {
         if ($form->isValid()) {
             /** @var UploadedFile $file */
             $file = $form['image']->getData();
+            $config = $form['config']->getData();
             $manager = $this->container->get('wucdbm_gallery.manager.images');
-            $file = $manager->moveFileToTemp($file);
+            $file = $manager->moveFileToTemp($file, $config);
 
             return $this->redirectToRoute('wucdbm_gallery_image_crop', [
                 'config' => $config,
@@ -43,12 +42,14 @@ class ImageController extends BaseController {
         return $this->render('@WucdbmGallery/Image/upload/upload.html.twig', $data);
     }
 
-    public function cropAction($config, $name, Request $request) {
+    public function cropAction($name, $config, Request $request) {
+//        var_dump($config);
+//        exit();
         $manager = $this->get('wucdbm_gallery.manager.images');
 
         $dimensions = new CropDimensions();
         $dimensions->setConfig($config);
-        $imagePath = $manager->getTempFilePath($name);
+        $imagePath = $manager->getTempFilePath($config, $name);
         $type = exif_imagetype($imagePath);
         $dimensions->setType($type);
 
@@ -91,14 +92,14 @@ class ImageController extends BaseController {
         }
 
         $data = [
-            'config' => $config,
+            'config'        => $config,
             'configuration' => $config ? $manager->getConfig($config) : null,
-            'name'   => $name,
-            'image'  => $imagePath,
-            'form'   => $form->createView(),
-            'error'  => $error,
-            'ratios' => $manager->getAspectRatios(),
-            'sizes'  => $manager->getSizes()
+            'name'          => $name,
+            'image'         => $imagePath,
+            'form'          => $form->createView(),
+            'error'         => $error,
+            'ratios'        => $manager->getAspectRatios(),
+            'sizes'         => $manager->getSizes()
         ];
 
         return $this->render('@WucdbmGallery/Image/crop/crop.html.twig', $data);
@@ -108,7 +109,7 @@ class ImageController extends BaseController {
         $manager = $this->get('wucdbm_gallery.manager.images');
 
         $dimensions = new CropDimensions();
-        $imagePath = $manager->getTempFilePath($name);
+        $imagePath = $manager->getTempFilePath($config, $name);
         $type = exif_imagetype($imagePath);
         $dimensions->setType($type);
 
@@ -161,9 +162,8 @@ class ImageController extends BaseController {
 
             return $this->render('@WucdbmGallery/Image/error/config_not_found.html.twig', $data);
         }
-
-
-        $imagePath = $manager->getTempFilePath($name);
+        
+        $imagePath = $manager->getTempFilePath($config, $name);
 
         $md5 = md5_file($imagePath);
         $image = $manager->getImageByMd5AndConfigId($md5, $configEntity->getId());
@@ -223,17 +223,11 @@ class ImageController extends BaseController {
         return $this->render('@WucdbmGallery/Image/edit/edit.html.twig', $data);
     }
 
-    public function serveTempAction($name) {
+    public function serveTempAction($config, $name) {
         $manager = $this->get('wucdbm_gallery.manager.images');
-        $image = $manager->getTempFilePath($name);
-        $file = new File($image);
-        $response = new FileResponse($image);
-        $response->setStatusCode(Response::HTTP_OK);
-        $response->headers->set('Content-Type', $file->getMimeType());
-        $response->headers->set('Content-Length', $file->getSize());
-        $response->headers->set('Content-Disposition', 'inline; filename="' . $name . '"');
+        $image = $manager->getTempFilePath($config, $name);
 
-        return $response;
+        return new BinaryFileResponse($image);
     }
 
     /**
@@ -259,7 +253,7 @@ class ImageController extends BaseController {
 
         return $this->json([
             'success' => true,
-            'remove' => true,
+            'remove'  => true,
             'bootbox' => 'Image removed.'
         ]);
     }

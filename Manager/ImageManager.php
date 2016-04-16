@@ -5,6 +5,7 @@ namespace Wucdbm\Bundle\GalleryBundle\Manager;
 use Intervention\Image\ImageManagerStatic;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Wucdbm\Bundle\GalleryBundle\Entity\Config;
 use Wucdbm\Bundle\GalleryBundle\Entity\Image;
 use Wucdbm\Bundle\GalleryBundle\Exception\ConfigNotFoundException;
 use Wucdbm\Bundle\GalleryBundle\Image\CropDimensions;
@@ -52,16 +53,19 @@ class ImageManager extends AbstractManager {
 
     /**
      * @param UploadedFile $file
-     * @return UploadedFile
+     * @param Config $config
+     * @return File
      */
-    public function moveFileToTemp(UploadedFile $file) {
-        $newFile = $file->move($this->getTempDir(), $this->getFileMd5Name($file));
+    public function moveFileToTemp(UploadedFile $file, $config) {
+        $newFile = $file->move($this->getTempDir($config), $this->getFileMd5Name($file));
 
         return $newFile;
     }
 
-    protected function getTempDir() {
-        return $this->container->getParameter('uploads.images.temp');
+    protected function getTempDir($config) {
+        $config = $this->getConfig($config);
+
+        return $config['temp'];
     }
 
     public function getFileMd5Name(UploadedFile $file) {
@@ -72,8 +76,8 @@ class ImageManager extends AbstractManager {
         return $name;
     }
 
-    public function getTempFilePath($name) {
-        $dir = $this->getTempDir();
+    public function getTempFilePath($config, $name) {
+        $dir = $this->getTempDir($config);
 
         return $dir . DIRECTORY_SEPARATOR . $name;
     }
@@ -84,21 +88,23 @@ class ImageManager extends AbstractManager {
      * @return File
      */
     public function cropTempImage($name, CropDimensions $dimensions) {
-        $path = $this->getTempFilePath($name);
+        $config = $dimensions->getConfig();
+        $path = $this->getTempFilePath($config, $name);
         $oldExtension = pathinfo($path, PATHINFO_EXTENSION);
         $img = ImageManagerStatic::make($path);
         $img->crop($dimensions->getWidth(), $dimensions->getHeight(), $dimensions->getX1(), $dimensions->getY1());
 
         $unique = uniqid();
         // Just if two people would edit the same image. Rather unlikely, but just in case
-        $tempPath = $this->getTempFilePath('_crop_' . $unique . '_' . $name);
+        $name = '_crop_' . $unique . '_' . $name;
+        $tempPath = $this->getTempFilePath($config, $name);
         $img->save($tempPath);
         $img->destroy();
 
         $file = new File($tempPath);
         $md5 = md5_file($tempPath);
         $newName = $md5 . '.' . $oldExtension;
-        $file = $file->move($this->getTempDir(), $newName);
+        $file = $file->move($this->getTempDir($config), $newName);
 
         return $file;
     }
@@ -155,7 +161,8 @@ class ImageManager extends AbstractManager {
     }
 
     public function saveFile($name, Image $image) {
-        $path = $this->getTempFilePath($name);
+        $config = $image->getConfig()->getKey();
+        $path = $this->getTempFilePath($config, $name);
         $file = new File($path);
         $dir = $this->getImageDirectory($image);
         $file = $file->move($dir, $name);
@@ -164,7 +171,7 @@ class ImageManager extends AbstractManager {
     }
 
     public function getImageDirectory(Image $image) {
-        $imagesDir = $this->getImagesDir();
+        $imagesDir = $this->getImagesDir($image->getConfig());
         $path = $this->getImageSubDir($image);
         $dir = $imagesDir . ($path ? DIRECTORY_SEPARATOR . $path : '');
 
@@ -179,8 +186,10 @@ class ImageManager extends AbstractManager {
         return $impl->getSubDirectory($image, $strategy['options']);
     }
 
-    protected function getImagesDir() {
-        return $this->container->getParameter('uploads.images.path');
+    protected function getImagesDir(Config $config) {
+        $config = $this->getConfig($config->getKey());
+
+        return $config['path'];
     }
 
     public function remove(Image $image) {
@@ -200,11 +209,12 @@ class ImageManager extends AbstractManager {
 
 
     public function getImageUrl(Image $image) {
-        $host = $this->container->getParameter('uploads.images.host');
+        $config = $this->getConfig($image->getConfig()->getKey());
+        $host = $config['host'];
         $subDir = $this->getImageSubDir($image);
         $name = $this->getImageName($image);
 
-        return $host . '/' . ($subDir ? $subDir . '/' : '') . $name;
+        return sprintf($host, ($subDir ? $subDir . '/' : '') . $name);
     }
 
     public function getImagePath(Image $image) {
