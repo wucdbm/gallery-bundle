@@ -98,7 +98,6 @@ class ImageManager extends AbstractManager {
         $file = new File($tempPath);
         $md5 = md5_file($tempPath);
         $newName = $md5 . '.' . $oldExtension;
-//        $newName = $md5 . image_type_to_extension($dimensions->getType());
         $file = $file->move($this->getTempDir(), $newName);
 
         return $file;
