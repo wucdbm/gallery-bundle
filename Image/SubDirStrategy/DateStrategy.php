@@ -28,4 +28,8 @@ class DateStrategy extends AbstractSubDirStrategy {
         return $subDir;
     }
 
+    public function getName() {
+        return 'date';
+    }
+
 }

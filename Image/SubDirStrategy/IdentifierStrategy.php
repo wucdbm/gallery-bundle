@@ -16,4 +16,8 @@ class IdentifierStrategy extends AbstractSubDirStrategy {
         return $subDir . DIRECTORY_SEPARATOR . $image->getId();
     }
 
+    public function getName() {
+        return 'identifier';
+    }
+
 }

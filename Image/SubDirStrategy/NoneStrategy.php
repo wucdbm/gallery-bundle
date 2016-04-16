@@ -12,4 +12,8 @@ class NoneStrategy extends AbstractSubDirStrategy {
         return '';
     }
 
+    public function getName() {
+        return 'none';
+    }
+
 }
