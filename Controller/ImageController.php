@@ -43,8 +43,6 @@ class ImageController extends BaseController {
     }
 
     public function cropAction($name, $config, Request $request) {
-//        var_dump($config);
-//        exit();
         $manager = $this->get('wucdbm_gallery.manager.images');
 
         $dimensions = new CropDimensions();
