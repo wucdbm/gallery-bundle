@@ -13,14 +13,14 @@ class ConfigChoiceType extends AbstractType {
      */
     protected $choices = [];
 
-    protected $test = [];
+    protected $configs = [];
 
     /**
      * ConfigChoiceType constructor.
      * @param array $configs
      */
     public function __construct(array $configs = []) {
-        $this->test = $configs;
+        $this->configs = $configs;
         foreach ($configs as $choiceName => $choiceConfig) {
             $this->choices[$choiceName] = $choiceName;
         }
@@ -37,11 +37,11 @@ class ConfigChoiceType extends AbstractType {
     public function configureOptions(OptionsResolver $resolver) {
         $resolver->setDefaults([
             'choices'      => $this->choices,
-            'choice_value' => function ($asd) {
-                return $asd;
+            'choice_value' => function ($config) {
+                return $config;
             },
-            'choice_label' => function ($asd) {
-                return $this->test[$asd]['name'];
+            'choice_label' => function ($config) {
+                return $this->configs[$config]['name'];
             }
         ]);
     }
