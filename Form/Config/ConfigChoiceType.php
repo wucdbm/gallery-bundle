@@ -22,8 +22,6 @@ class ConfigChoiceType extends AbstractType {
     public function __construct(array $configs = []) {
         $this->test = $configs;
         foreach ($configs as $choiceName => $choiceConfig) {
-            var_dump($choiceName);
-            var_dump($choiceConfig['name']);
             $this->choices[$choiceName] = $choiceName;
         }
     }
